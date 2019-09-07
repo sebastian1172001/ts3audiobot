@@ -1,29 +1,17 @@
-FROM ubuntu:latest
+FROM ubuntu:18.04
 
-MAINTAINER Sebastian U. admin@zuchtbude.de
+RUN apt-get update && apt-get install -y ffmpeg wget p7zip-full gpg libopus-dev python
 
-ENV DEBIAN_FRONTEND noninteractive
+RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF
+RUN echo "deb http://download.mono-project.com/repo/debian stable-bionic main" > /etc/apt/sources.list.d/mono-official-stable.list \
+  && apt-get update \
+  && apt-get install -y mono-complete \
+  && rm -rf /var/lib/apt/lists/* /tmp/*
 
-RUN mkdir /mnt/server && \
-	cd /mnt/server && \
-    apt update && \
-    apt upgrade -y && \
-    apt install -y curl unzip gnupg ca-certificates libopus-dev python-pip ffmpeg  && \
-  	apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF && \
-  	echo "deb https://download.mono-project.com/repo/ubuntu stable-bionic main" | tee /etc/apt/sources.list.d/mono-official-stable.list && \
-	apt-get update && \
-	apt-get install ca-certificates-mono mono-devel mono-complete -y && \
-	mono --version && \
-	curl -L https://splamy.de/api/nightly/ts3ab/develop/download -o /mnt/server/bot.zip && \
-	unzip /mnt/server/bot.zip && \
-    useradd -d /home/container -m container
+RUN wget https://yt-dl.org/downloads/latest/youtube-dl -O /usr/local/bin/youtube-dl && chmod a+rx /usr/local/bin/youtube-dl
+RUN mkdir /mnt/server
+RUN mkdir /mnt/server/Bots
+WORKDIR /mnt/server
+RUN wget -O TS3AudioBot.zip https://splamy.de/api/nightly/ts3ab/master/download && 7z x TS3AudioBot.zip && rm -f TS3AudioBot.zip
 
-USER container
-ENV  USER container
-ENV  HOME /home/container
-
-WORKDIR /home/container
-
-COPY ./entrypoint.sh /entrypoint.sh
-
-CMD ["/bin/bash", "/entrypoint.sh"]
+CMD  ["mono", "TS3AudioBot.exe", "--non-interactive", "-c", "/config/TS3AudioBot.config"]
