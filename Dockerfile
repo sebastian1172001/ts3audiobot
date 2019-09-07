@@ -14,4 +14,4 @@ RUN mkdir /mnt/server/Bots
 WORKDIR /mnt/server
 RUN wget -O TS3AudioBot.zip https://splamy.de/api/nightly/ts3ab/master/download && 7z x TS3AudioBot.zip && rm -f TS3AudioBot.zip
 
-CMD  ["mono", "TS3AudioBot.exe", "--non-interactive", "-c", "/config/TS3AudioBot.config"]
+CMD  ["mono", "TS3AudioBot.exe", "--non-interactive", "-c", "/home/container/config/TS3AudioBot.config"]
